@@ -1,0 +1,93 @@
+---
+title: "Final Project"
+output: word_document
+author: "Varun Randive"
+date: "`r Sys.Date()`"
+---
+
+```{r}
+
+library(lmtest)
+library(sandwich)
+library(Hmisc)
+
+```
+
+```{r}
+load(file = "~/Desktop/2nd Sem/Multivariate/Final_Project.RData")
+
+data <- data.frame(COVID19_line_list_data)
+describe(data)
+
+data$death_dummy <- as.integer(data$death != 0)
+
+```
+
+```{r}
+
+reg<-lm(death_dummy~gender,data=data)
+reg
+
+```
+
+```{r}
+
+summary(reg)
+
+```
+
+```{r}
+
+vcov = vcovHC(reg, type="HC1")
+robust_se <- sqrt(diag(vcov))
+robust_se
+
+```
+
+```{r}
+
+coeftest(reg, vcov. = vcov)
+reg$coefficients[2]- 1.96*robust_se[2]
+
+```
+
+```{r}
+
+sum(data$death_dummy) / nrow(data)
+
+```
+
+```{r}
+
+dead = subset(data, death_dummy == 1)
+alive = subset(data, death_dummy == 0)
+mean(dead$age, na.rm=TRUE)
+mean(alive$age, na.rm=TRUE)
+
+```
+
+```{r}
+
+t.test(dead$age, alive$age, alternative="two.sided", conf.level = 0.95)
+
+```
+
+```{r}
+
+men = subset(data, gender == "male")
+women = subset(data, gender == "female")
+
+```
+
+```{r}
+
+mean(men$death_dummy, na.rm=TRUE)
+mean(women$death_dummy, na.rm=TRUE)
+
+```
+
+```{r}
+
+t.test(men$death_dummy, women$death_dummy, alternative="two.sided", conf.level = 0.95)
+
+```
